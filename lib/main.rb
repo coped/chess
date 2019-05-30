@@ -1,5 +1,5 @@
-require './lib/gameboard'
-require './lib/pieces'
+require_relative 'gameboard'
+require_relative 'pieces'
 
 def play_game
 end
