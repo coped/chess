@@ -11,5 +11,7 @@ ruby lib/main.rb
 ### How To Play
 A description of chess and its rules can be found on the [Wikipedia entry for chess](https://en.wikipedia.org/wiki/Chess).
 
+This game uses the algebraic notation for making moves on the chess board.
+
 # Author
 Dennis Cope, [GITHUB](https://github.com/coped).
