@@ -2,14 +2,11 @@ require_relative "gameboard"
 
 module MoveHelper
     def get_children(position, move_set)
-        children = []
-        move_set.each do |move|
+        return move_set.reduce([]) do |children, move|
             result = [(position[0] + move[0]), (position[1] + move[1])]
-            if result.all? { |i| (1..8).include?(i) }
-                children << result
-            end
+            children << result if result.all? { |i| (1..8).include?(i) }
+            children
         end
-        children
     end
 end
 
@@ -19,12 +16,13 @@ class Pawn
     attr_accessor :position
 
     def initialize(player, position)
+        @player = player
         if player.white?
             @symbol = "\u2659"
-            @move_set = [[0, 1]]
+            position[1] > 2 ? @move_set = [[0, 1]] : @move_set = [[0, 2], [0, 1]]
         else
             @symbol = "\u265F"
-            @move_set = [[0, -1]]
+            position[1] < 7 ? @move_set = [[0, -1]] : @move_set = [[0, -2], [0, -1]]
         end
         @position = position
         @children = get_children(@position, @move_set)
@@ -37,6 +35,7 @@ class Knight
     attr_accessor :position
 
     def initialize(player, position)
+        @player = player
         player.white? ? @symbol = "\u2658" : @symbol = "\u265E"
         @move_set = [
             [+1, +2], [+2, +1],
@@ -55,21 +54,21 @@ class Rook
     attr_accessor :position
 
     def initialize(player, position)
+        @player = player
         player.white? ? @symbol = "\u2656" : @symbol = "\u265C"
         @move_set = get_move_set
         @position = position
         @children = get_children(@position, @move_set)
     end
 
-    def get_move_set 
-        move_set = []
-        (-8..8).each do |i|
+    def get_move_set
+        return (-8..8).reduce([]) do |move_set, i|
             unless i == 0
                 move_set << [i, 0]
                 move_set << [0, i]
             end
+            move_set
         end
-        move_set
     end
 end
 
@@ -79,6 +78,7 @@ class Bishop
     attr_accessor :position
 
     def initialize(player, position)
+        @player = player
         player.white? ? @symbol = "\u2657" : @symbol = "\u265D"
         @move_set = get_move_set
         @position = position
@@ -86,14 +86,13 @@ class Bishop
     end
 
     def get_move_set
-        move_set = []
-        (-8..8).each do |i| 
+        return (-8..8).reduce([]) do |move_set, i| 
             unless i == 0
                 move_set << [i, i]
                 move_set << [-i, i]
             end
+            move_set
         end
-        move_set
     end
 end
 
@@ -103,6 +102,7 @@ class King
     attr_accessor :position
 
     def initialize(player, position)
+        @player = player
         player.white? ? @symbol = "\u2654" : @symbol = "\u265A"
         @move_set = [
             [+0, +1], [+1, +1],
@@ -121,6 +121,7 @@ class Queen
     attr_accessor :position
 
     def initialize(player, position)
+        @player = player
         player.white? ? @symbol = "\u2655" : @symbol = "\u265B"
         @move_set = get_move_set
         @position = position
@@ -128,13 +129,12 @@ class Queen
     end
 
     def get_move_set
-        move_set = []
-        (-8..8).each do |i|
+        return (-8..8).reduce([]) do |move_set, i|
             unless i == 0
                 temp = [[i, i], [-i, i], [0, i], [i, 0]]
                 temp.each { |move| move_set << move }
             end
+            move_set
         end
-        move_set
     end
 end

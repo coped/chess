@@ -10,9 +10,27 @@ describe Pawn do
         end
     end
     describe "get_children" do
-        it "returns all possible moves pawn can make" do
-            pawn = Pawn.new(player[0], [4, 4])
-            expect(pawn.children).to eql([[4, 5]])
+        context "when white" do
+            it "returns all possible moves pawn can make on first move" do
+                pawn = Pawn.new(player[0], [4, 2])
+                results = [[4, 3], [4, 4]]
+                expect(pawn.children.all? { |child| results.include?(child) }).to be_truthy
+            end
+            it "returns all possible moves pawn can make after first move" do
+                pawn = Pawn.new(player[0], [4, 4])
+                expect(pawn.children).to eql([[4, 5]])
+            end
+        end
+        context "when black" do
+            it "returns all possible moves pawn can make on first move" do
+                pawn = Pawn.new(player[1], [4, 7])
+                results = [[4, 6], [4, 5]]
+                expect(pawn.children.all? { |child| results.include?(child) }).to be_truthy
+            end
+            it "returns all possible moves pawn can make after first move" do
+                pawn = Pawn.new(player[1], [4, 5])
+                expect(pawn.children).to eql([[4, 4]])
+            end
         end
     end
 end
@@ -116,15 +134,14 @@ describe Queen do
     describe "get_children" do
         it "returns all possible moves queen can make" do
             queen = Queen.new(player[0], [4, 4])
-            results =[]
-            (-8..8).each do |i|
-                temp = [[i, i], [-i, i], [0, i], [i, 0]]
-                unless i == 0
-                    temp.each do |move|
-                        ary = [(move[0] + queen.position[0]), (move[1] + queen.position[1])]
-                        results << ary if ary.all? { |i| (1..8).include?(i) }
+            results = (-8..8).reduce([]) do |result, i|
+                [[i, i], [-i, i], [0, i], [i, 0]].each do |move|
+                    unless i == 0
+                        temp = [(move[0] + queen.position[0]), (move[1] + queen.position[1])]
+                        result << temp if temp.all? { |i| (1..8).include?(i) }
                     end
                 end
+                result
             end
             expect(queen.children.all? { |child| results.include?(child) }).to be_truthy
         end
