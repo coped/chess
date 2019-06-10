@@ -1,51 +1,6 @@
 require_relative "pieces"
-
-class Player
-    attr_reader :pieces
-
-    def initialize(color)
-        @color = color
-        @pieces = create_pieces
-    end
-
-    def make_turn
-        # To define later...
-    end
-    
-    def white?
-        @color == "white" ? true : false
-    end
-
-    def create_pieces
-        if self.white?
-            pieces = [
-                Rook.new(self, [1, 1]),
-                Rook.new(self, [8, 1]),
-                Knight.new(self, [2, 1]),
-                Knight.new(self, [7, 1]),
-                Bishop.new(self, [3, 1]),
-                Bishop.new(self, [6, 1]),
-                King.new(self, [5, 1]),
-                Queen.new(self, [4, 1])
-            ]
-            (1..8).each { |i| pieces << Pawn.new(self, [i, 2]) }
-            return pieces
-        else
-            pieces = [
-                Rook.new(self, [1, 8]),
-                Rook.new(self, [8, 8]),
-                Knight.new(self, [2, 8]),
-                Knight.new(self, [7, 8]),
-                Bishop.new(self, [3, 8]),
-                Bishop.new(self, [6, 8]),
-                King.new(self, [5, 8]),
-                Queen.new(self, [4, 8])
-            ]
-            (1..8).each { |i| pieces << Pawn.new(self, [i, 7]) }
-            return pieces
-        end
-    end
-end
+require_relative "players"
+require_relative "modules"
 
 class Square
     attr_reader :position
@@ -55,18 +10,54 @@ class Square
         @position = position
         @symbol = " "
     end
-
 end
 
 class GameBoard
-    attr_reader :board
-    attr_accessor :turn
+    include ParseInput
+    include MoveHelper
+    attr_reader :board, :turn, :over, :all_pieces
     
     def initialize(players)
         @players = players
-        @all_pieces = players[0].pieces + players[1].pieces
+        @all_pieces = players.first.pieces + players.last.pieces
         @board = create_board(create_coordinates)
+        update_board
         @turn = 0
+        @over = false
+    end
+
+    def make_move(player)
+        valid_input = false
+        input = gets.chomp.strip.downcase
+        if input.empty?
+            puts "Put something, nerd."
+            make_move(player)
+        end
+        input = input.split(" ")
+        from = parse(input.first)
+        to = parse(input.last)
+
+        if valid?(from) and valid?(to)
+            piece = @all_pieces.find { |piece| piece.position == from }
+            taken_piece = @all_pieces.find { |piece| piece.position == to }
+            if player.pieces.include?(piece) and piece.children.include?(to)
+                valid_input = true
+                taken_piece.position = "taken" unless taken_piece.nil?
+                piece.position = to
+                @turn += 1
+                update_board
+                display_board
+            elsif player.pieces.include?(piece) and !piece.children.include?(to)
+                puts "Illegal move"
+            elsif !player.pieces.include?(piece)
+                puts "That's not your piece"
+            end
+        else
+            puts "Invalid command"
+        end
+        unless valid_input
+            make_move(player)
+        end
     end
 
     def update_board
@@ -74,15 +65,15 @@ class GameBoard
             piece = @all_pieces.find { |piece| piece.position == square.position }
             unless piece.nil?
                 square.symbol = piece.symbol
+                piece.children = get_children(piece, @all_pieces)
             else
                 square.symbol = " "
             end
         end
     end
 
-
     def display_board
-        update_board
+        taken_pieces = @all_pieces.find_all { |piece| piece.position == "taken" }
         horizontal = "   |-----|-----|-----|-----|-----|-----|-----|-----|"
         lines = [
             "      A     B     C     D     E     F     G     H",
@@ -115,7 +106,6 @@ class GameBoard
     end
 
     def create_board(coordinates)
-        all_pieces = @players[0].pieces + @players[1].pieces
         return coordinates.reduce([]) do |board, coordinate|
                 board << Square.new(coordinate)
         end

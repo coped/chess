@@ -33,6 +33,7 @@ Making a move in this game is done by defining the algebraic notation coordinate
    |-----|-----|-----|-----|-----|-----|-----|-----|
       A     B     C     D     E     F     G     H
 
+Player 1's turn (white):
 ```
 To move the pawn located on a2 up two spaces, one would input:
 ```
@@ -60,6 +61,10 @@ Resulting in:
    |-----|-----|-----|-----|-----|-----|-----|-----|
       A     B     C     D     E     F     G     H
 
+Player 2's turn (black):
 ```
+### Note:
+Some command-line interfaces invert text colors, making white chess pieces appear black, and conversely, black pieces white. Just remember, white pieces always start from the bottom of the board (rows 1 and 2), and black pieces always start from the top (rows 7 and 8).
+
 # Author
 Dennis Cope, [GITHUB](https://github.com/coped).

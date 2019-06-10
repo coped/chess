@@ -1,149 +1,145 @@
 require "./lib/pieces.rb"
 
 describe Pawn do
-    let(:player) { [Player.new("white"), Player.new("black")] }
+    let(:players) { [Player.new("white"), Player.new("black")] }
 
-    it "has a white and black pawn symbol" do
-        player.each do |player| 
-            pawn = Pawn.new(player, [4, 4])
-            puts pawn.symbol
+    context "when white player" do
+        let(:pawn) { Pawn.new(players.first, [4, 4]) }
+
+        it "has white color" do
+            expect(pawn.color).to eql("white")
+        end
+        it "uses white pawn unicode" do
+            expect(pawn.symbol).to eql("\u2659")
         end
     end
-    describe "get_children" do
-        context "when white" do
-            it "returns all possible moves pawn can make on first move" do
-                pawn = Pawn.new(player[0], [4, 2])
-                results = [[4, 3], [4, 4]]
-                expect(pawn.children.all? { |child| results.include?(child) }).to be_truthy
-            end
-            it "returns all possible moves pawn can make after first move" do
-                pawn = Pawn.new(player[0], [4, 4])
-                expect(pawn.children).to eql([[4, 5]])
-            end
+    context "when black player" do
+        let(:pawn) { Pawn.new(players.last, [4, 4]) }
+        it "has black color" do
+            expect(pawn.color).to eql("black")
         end
-        context "when black" do
-            it "returns all possible moves pawn can make on first move" do
-                pawn = Pawn.new(player[1], [4, 7])
-                results = [[4, 6], [4, 5]]
-                expect(pawn.children.all? { |child| results.include?(child) }).to be_truthy
-            end
-            it "returns all possible moves pawn can make after first move" do
-                pawn = Pawn.new(player[1], [4, 5])
-                expect(pawn.children).to eql([[4, 4]])
-            end
+        it "uses black pawn unicode" do
+            expect(pawn.symbol).to eql("\u265F")
         end
     end
 end
 describe Knight do
-    let(:player) { [Player.new("white"), Player.new("black")] }
+    let(:players) { [Player.new("white"), Player.new("black")] }
 
-    it "has a white and black knight symbol" do
-        player.each do |player|
-            knight = Knight.new(player, [4, 4])
-            puts knight.symbol
+    context "when white player" do
+        let(:knight) { Knight.new(players.first, [4, 4]) }
+
+        it "has white color" do
+            expect(knight.color).to eql("white")
+        end
+        it "uses white knight unicode" do
+            expect(knight.symbol).to eql("\u2658")
         end
     end
-    describe "get_children" do
-        it "returns all possible moves knight can make" do
-            knight = Knight.new(player[0], [4, 4])
-            results = [
-                [5, 6], [6, 5],
-                [6, 3], [5, 2],
-                [3, 2], [2, 3],
-                [3, 6], [2, 5]
-            ]
-            expect(knight.children.all? { |child| results.include?(child) }).to be_truthy
+    context "when black player" do
+        let(:knight) { Knight.new(players.last, [4, 4]) }
+
+        it "has black color" do
+            expect(knight.color).to eql("black")
+        end
+        it "uses black night unicode" do
+            expect(knight.symbol).to eql("\u265E")
         end
     end
 end
 describe Rook do
-    let(:player) { [Player.new("white"), Player.new("black")] }
+    let(:players) { [Player.new("white"), Player.new("black")] }
 
-    it "has a white and black rook symbol" do
-        player.each do |player|
-            rook = Rook.new(player, [4, 4])
-            puts rook.symbol
+    context "when white player" do
+        let(:rook) { Rook.new(players.first, [4, 4]) }
+
+        it "has white color" do
+            expect(rook.color).to eql("white")
+        end
+        it "uses white rook unicode" do
+            expect(rook.symbol).to eql("\u2656")
         end
     end
-    describe "get_children" do
-        it "returns all possible moves rook can make" do
-            rook = Rook.new(player[0], [4, 4])
-            results = [
-                [1, 4], [2, 4], [3, 4], [5, 4],
-                [6, 4], [7, 4], [8, 4], [4, 1],
-                [4, 2], [4, 3], [4, 5], [4, 6],
-                [4, 7], [4, 8]
-        ]
-        expect(rook.children.all? { |child| results.include?(child) }).to be_truthy
+    context "when black player" do
+        let(:rook) { Rook.new(players.last, [4,4]) }
+
+        it "has black color" do
+            expect(rook.color).to eql("black")
+        end
+        it "uses black rook unicode" do
+            expect(rook.symbol).to eql("\u265C")
         end
     end
 end
 describe Bishop do
-    let(:player) { [Player.new("white"), Player.new("black")] }
+    let(:players) { [Player.new("white"), Player.new("black")] }
 
-    it "has a white and black bishop symbol" do
-        player.each do |player|
-            bishop = Bishop.new(player, [4, 4])
-            puts bishop.symbol
+    context "when white player" do
+        let(:bishop) { Bishop.new(players.first, [4, 4]) }
+
+        it "has white color" do
+            expect(bishop.color).to eql("white")
+        end
+        it "uses white bishop unicode" do
+            expect(bishop.symbol).to eql("\u2657")
         end
     end
-    describe "get_children" do
-        it "returns all possible moves bishop can make" do
-            bishop = Bishop.new(player[0], [4, 4])
-            results = [
-                [1, 1], [2, 2], [3, 3], [5, 5],
-                [6, 6], [7, 7], [8, 8], [3, 5],
-                [2, 6], [1, 7], [2, 6], [3, 5],
-                [5, 3], [6, 2], [7, 1]
-            ]
-            expect(bishop.children.all? { |child| results.include?(child) }).to be_truthy
+    context "when black player" do
+        let(:bishop) { Bishop.new(players.last, [4, 4]) }
+
+        it "has black color" do
+            expect(bishop.color).to eql("black")
+        end
+        it "uses black bishop unicode" do
+            expect(bishop.symbol).to eql("\u265D")
         end
     end
 end
 describe King do
-    let(:player) { [Player.new("white"), Player.new("black")] }
+    let(:players) { [Player.new("white"), Player.new("black")] }
 
-    it "has a white and black king symbol" do
-        player.each do |player|
-            king = King.new(player, [4, 4])
-            puts king.symbol
+    context "when white player" do
+        let(:king) { King.new(players.first, [4, 4]) }
+
+        it "has white color" do
+            expect(king.color).to eql("white")
+        end
+        it "uses white king unicode" do
+            expect(king.symbol).to eql("\u2654")
         end
     end
-    describe "get_children" do
-        it "returns all possible moves king can make" do
-            king = King.new(player[0], [4, 4])
-            results = [
-                [4, 5], [5, 5], 
-                [5, 4], [5, 3],
-                [4, 3], [3, 3],
-                [3, 4], [3, 5]
-            ]
-            expect(king.children.all? { |child| results.include?(child) }).to be_truthy
+    context "when black player" do
+        let(:king) { King.new(players.last, [4, 4]) }
+
+        it "has black color" do
+            expect(king.color).to eql("black")
+        end
+        it "uses black king unicode" do
+            expect(king.symbol).to eql("\u265A")
         end
     end
 end 
 describe Queen do
-    let(:player) { [Player.new("white"), Player.new("black")] }
+    let(:players) { [Player.new("white"), Player.new("black")] }
 
-    it "has a white and black queen symbol" do
-        player.each do |player|
-            queen = Queen.new(player, [4, 4])
-            puts queen.symbol
+    context "when white player" do
+        let(:queen) { Queen.new(players.first, [4, 4]) }
+
+        it "has white color" do
+            expect(queen.color).to eql("white")
+        end
+        it "uses white queen unicode" do
+            expect(queen.symbol).to eql("\u2655")
         end
     end
-    describe "get_children" do
-        it "returns all possible moves queen can make" do
-            queen = Queen.new(player[0], [4, 4])
-            results = (-8..8).reduce([]) do |result, i|
-                [[i, i], [-i, i], [0, i], [i, 0]].each do |move|
-                    unless i == 0
-                        temp = [(move[0] + queen.position[0]), (move[1] + queen.position[1])]
-                        result << temp if temp.all? { |i| (1..8).include?(i) }
-                    end
-                end
-                result
-            end
-            expect(queen.children.all? { |child| results.include?(child) }).to be_truthy
+    context "when black player" do
+        let(:queen) { Queen.new(players.last, [4, 4]) }
+
+        it "has black color" do
+            expect(queen.color).to eql("black")
+        end
+        it "uses black queen unicode" do
+            expect(queen.symbol).to eql("\u265B")
         end
     end
 end
