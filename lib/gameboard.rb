@@ -1,6 +1,6 @@
-require_relative "pieces"
-require_relative "players"
-require_relative "modules"
+require_relative 'pieces'
+require_relative 'players'
+require_relative 'modules'
 
 class Square
     attr_reader :position
@@ -18,8 +18,7 @@ class GameBoard
     attr_reader :board, :turn, :over, :all_pieces
     
     def initialize(players)
-        @players = players
-        @all_pieces = players.first.pieces + players.last.pieces
+        @all_pieces = players[0].pieces + players[1].pieces
         @board = create_board(create_coordinates)
         update_board
         @turn = 0
@@ -42,7 +41,7 @@ class GameBoard
             taken_piece = @all_pieces.find { |piece| piece.position == to }
             if player.pieces.include?(piece) and piece.children.include?(to)
                 valid_input = true
-                taken_piece.position = "taken" unless taken_piece.nil?
+                taken_piece.position = :taken if !taken_piece.nil?
                 piece.position = to
                 @turn += 1
                 update_board
@@ -55,7 +54,7 @@ class GameBoard
         else
             puts "Invalid command"
         end
-        unless valid_input
+        if !valid_input
             make_move(player)
         end
     end
@@ -63,7 +62,7 @@ class GameBoard
     def update_board
         @board.each do |square|
             piece = @all_pieces.find { |piece| piece.position == square.position }
-            unless piece.nil?
+            if piece
                 square.symbol = piece.symbol
                 piece.children = get_children(piece, @all_pieces)
             else
@@ -73,7 +72,7 @@ class GameBoard
     end
 
     def display_board
-        taken_pieces = @all_pieces.find_all { |piece| piece.position == "taken" }
+        taken_pieces = @all_pieces.find_all { |piece| piece.position == :taken }
         horizontal = "   |-----|-----|-----|-----|-----|-----|-----|-----|"
         lines = [
             "      A     B     C     D     E     F     G     H",

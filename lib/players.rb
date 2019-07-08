@@ -1,8 +1,8 @@
-require_relative "pieces"
-require_relative "gameboard"
+require_relative 'pieces'
+require_relative 'gameboard'
 
 class Player
-    attr_accessor :pieces
+    attr_reader :color, :pieces
 
     def initialize(color)
         @color = color
@@ -10,7 +10,7 @@ class Player
     end
 
     def white?
-        @color == "white" ? true : false
+        @color == :white ? true : false
     end
 
     def create_pieces

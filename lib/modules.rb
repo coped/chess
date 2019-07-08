@@ -1,15 +1,27 @@
-require_relative "gameboard"
+require_relative 'gameboard'
+
+class Array
+    def x
+        self.first
+    end
+
+    def y
+        self.last
+    end
+end
 
 module MoveHelper
     def get_children(piece, all_pieces)
         children = []
         position = piece.position
-        if (piece.instance_of?(Bishop) or piece.instance_of?(Queen) or piece.instance_of?(Rook))
+        opponent_pieces = all_pieces.find_all { |o| o.color != piece.color }
+
+        bishop_queen_rook_children = -> do
             piece.move_set.each do |moves|
                 moves.each do |move|
-                    result = [(position.first + move.first), (position.last + move.last)]
+                    result = [(position.x + move.x), (position.y + move.y)]
                     if result.all? { |i| (1..8).include?(i) }
-                        result_piece = all_pieces.find { |x| x.position == result }
+                        result_piece = all_pieces.find { |r| r.position == result }
                         if result_piece.nil?
                             children << result
                         elsif result_piece.color == piece.color
@@ -21,59 +33,69 @@ module MoveHelper
                     end
                 end
             end
-        elsif piece.instance_of?(King)
+            children
+        end
+        
+        king_children = -> do
             piece.move_set.each do |move|
-                result = [(position.first + move.first), (position.last + move.last)]
+                result = [(position.x + move.x), (position.y + move.y)]
                 if result.all? { |i| (1..8).include?(i) }
-                    result_piece = all_pieces.find { |x| x.position == result }
-                    opponent_pieces = all_pieces.find_all { |opponent| opponent.color != piece.color }
+                    result_piece = all_pieces.find { |r| r.position == result }
                     if result_piece.nil?
-                        if opponent_pieces.none? { |piece| piece.children.any?(result) }
+                        if opponent_pieces.none? { |o| o.children.include?(result) }
                             children << result
+                        else
+                            puts "opponent can move here!"
                         end
                     else
-                        children << result unless result_piece.color == piece.color
+                        children << result if result_piece.color != piece.color
                     end
                 end
             end
-        elsif piece.instance_of?(Pawn)
+            children
+        end
+
+        pawn_children = -> do
             piece.move_set.each do |move|
-                result = [(position.first + move.first), (position.last + move.last)]
+                result = [(position.x + move.x), (position.y + move.y)]
                 if result.all? { |i| (1..8).include?(i) }
-                    result_piece = all_pieces.find { |x| x.position == result }
+                    result_piece = all_pieces.find { |r| r.position == result }
                     if result_piece.nil?
                         children << result
                     end
-                    if piece.color == "white"
-                        diagonal_right = [(position.first + 1), (position.last + 1)]
-                        diagonal_left = [(position.first - 1), (position.last + 1)]
-                        all_pieces.each do |diag_piece|
-                            if diag_piece.position == diagonal_right
-                                children << diag_piece.position
+                    if piece.color == :white
+                        up_right = [(position.x + 1), (position.y + 1)]
+                        up_left = [(position.x - 1), (position.y + 1)]
+                        opponent_pieces.each do |o|
+                            if o.position == up_right
+                                children << up_right
                             end
-                            if diag_piece.position == diagonal_left
-                                children << diag_piece.position
+                            if o.position == up_left
+                                children << up_left
                             end
                         end
-                    elsif piece.color == "black"
-                        diagonal_right = [(position.first + 1), (position.last - 1)]
-                        diagonal_left = [(position.first - 1), (position.last - 1)]
-                        all_pieces.each do |diag_piece|
-                            if diag_piece.position == diagonal_right
-                                children << diag_piece.position
+                    elsif piece.color == :black
+                        down_right = [(position.x + 1), (position.y - 1)]
+                        down_left = [(position.x - 1), (position.y - 1)]
+                        opponent_pieces.each do |o|
+                            if o.position == down_right
+                                children << down_right
                             end
-                            if diag_piece.position == diagonal_left
-                                children << diag_piece.position
+                            if o.position == down_left
+                                children << down_left
                             end
                         end
                     end
                 end
             end
-        else
+            children
+        end
+         
+        other_piece_children = -> do
             piece.move_set.each do |move|
-                result = [(position.first + move.first), (position.last + move.last)]
+                result = [(position.x + move.x), (position.y + move.y)]
                 if result.all? { |i| (1..8).include?(i) }
-                    result_piece = all_pieces.find { |x| x.position == result }
+                    result_piece = all_pieces.find { |r| r.position == result }
                     if result_piece.nil?
                         children << result
                     elsif result_piece.color != piece.color
@@ -81,8 +103,18 @@ module MoveHelper
                     end
                 end
             end
+            children
         end
-        children
+
+        if piece.is_a?(Bishop) or piece.is_a?(Queen) or piece.is_a?(Rook)
+            return bishop_queen_rook_children.call
+        elsif piece.is_a?(King)
+            return king_children.call
+        elsif piece.is_a?(Pawn)
+            return pawn_children.call
+        else 
+            return other_piece_children.call
+        end
     end
 end
 
@@ -100,11 +132,11 @@ module ParseInput
         when "h" then input[0] = "8"
         else return nil
         end
-        return input = input.map { |i| i.to_i }
+        return input.map { |i| i.to_i }
     end
 
     def valid?(input)
-        if ((1..8).include?(input.first) and (1..8).include?(input.last))
+        if (1..8).include?(input.first) and (1..8).include?(input.last)
             return true if input.length == 2
         end
         false

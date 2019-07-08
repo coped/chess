@@ -1,8 +1,9 @@
-require "./lib/modules"
+require './lib/modules'
 
 describe MoveHelper do
-    let(:players) { [Player.new("white"), Player.new("black")] }
-    let(:game) { GameBoard.new(players) }
+    let(:player1) { Player.new(:white) }
+    let(:player2) { Player.new(:black) }
+    let(:game) { GameBoard.new([player1, player2]) }
     
     describe "get_children" do
         context "when piece is a pawn" do
@@ -18,17 +19,17 @@ describe MoveHelper do
                 expect(result).to eql(true)
             end
             it "returns valid moves for white pawn after first move" do
-                pawn = Pawn.new(players.first, [1, 3])
-                players.first.pieces << pawn
+                pawn = Pawn.new(player1, [1, 3])
+                player1.pieces << pawn
                 game.update_board
                 expect(pawn.children).to eql([[1, 4]])
             end
             it "can diagonally take an opponent piece" do
                 result = false
                 white_pawn = game.all_pieces.find { |piece| piece.position == [2, 2] }
-                black_pawns = [Pawn.new(players.last, [3, 3]), Pawn.new(players.last, [1, 3])]
-                black_pawns.each { |pawn| players.last.pieces << pawn }
-                new_game = GameBoard.new(players)
+                black_pawns = [Pawn.new(player2, [3, 3]), Pawn.new(player2, [1, 3])]
+                black_pawns.each { |pawn| player2.pieces << pawn }
+                new_game = GameBoard.new([player1, player2])
                 expected = [
                     [2, 3], [2, 4],
                     [1, 3], [3, 3]
@@ -52,8 +53,8 @@ describe MoveHelper do
                 expect(result).to eql(true)
             end
             it "returns valid moves for black pawn after first move" do
-                pawn = Pawn.new(players.last, [1, 6])
-                players.last.pieces << pawn
+                pawn = Pawn.new(player2, [1, 6])
+                player2.pieces << pawn
                 game.update_board
                 expect(pawn.children).to eql([[1, 5]])
             end
@@ -61,8 +62,8 @@ describe MoveHelper do
         context "when piece is a knight" do
             it "returns valid moves for a knight" do
                 result = false
-                knight = Knight.new(players.first, [4, 5])
-                players.first.pieces << knight
+                knight = Knight.new(player1, [4, 5])
+                player1.pieces << knight
                 game.update_board
                 expected = [
                     [5, 7], [6, 6],
@@ -81,8 +82,8 @@ describe MoveHelper do
         context "when piece is a rook" do
             it "returns valid moves for a rook" do
                 result = false
-                rook = Rook.new(players.first, [4, 4])
-                players.first.pieces << rook
+                rook = Rook.new(player1, [4, 4])
+                player1.pieces << rook
                 game.update_board
                 expected = [
                     [1, 4], [2, 4], [3, 4], [5, 4],
@@ -100,8 +101,8 @@ describe MoveHelper do
         context "when piece is a bishop" do
             it "returns valid moves for a bishop" do
                 result = false
-                bishop = Bishop.new(players.first, [4, 4])
-                players.first.pieces << bishop
+                bishop = Bishop.new(player1, [4, 4])
+                player1.pieces << bishop
                 game.update_board
                 expected = [
                     [3, 3], [5, 5], [6, 6], [7, 7], 
@@ -118,9 +119,9 @@ describe MoveHelper do
         context "when piece is a king" do
             it "returns valid moves for a king" do
                 result = false
-                king = King.new(players.first, [4, 4])
-                players.first.pieces << king
-                game = GameBoard.new(players)
+                king = King.new(player1, [4, 4])
+                player1.pieces << king
+                game = GameBoard.new([player1, player2])
                 expected = [
                     [4, 5], [5, 5], 
                     [5, 4], [5, 3],
@@ -136,17 +137,16 @@ describe MoveHelper do
             end
             it "will not move into an opponent's path" do
                 result = false
-                opponent_rook = Rook.new(players.last, [2, 5])
-                players.last.pieces << opponent_rook
-                king = King.new(players.first, [4, 4])
-                players.first.pieces << king
-                game = GameBoard.new(players)
+                opponent_rook = Rook.new(player2, [2, 5])
+                player2.pieces << opponent_rook
+                king = King.new(player1, [4, 4])
+                player1.pieces << king
+                game = GameBoard.new([player1, player2])
                 expected = [
                     [5, 4], [5, 3],
                     [4, 3], [3, 3],
                     [3, 4]
                 ]
-                p king.children
                 if expected.all? { |position| king.children.include?(position) }
                     if king.children.all? { |child| expected.include?(child) }
                         result = true
@@ -158,8 +158,8 @@ describe MoveHelper do
         context "when piece is a queen" do
             it "returns valid moves for a queen" do
                 result = false
-                queen = Queen.new(players.first, [4, 4])
-                players.first.pieces << queen
+                queen = Queen.new(player1, [4, 4])
+                player1.pieces << queen
                 game.update_board
                 expected = [
                     [4, 3], [4, 5], [4, 6], [4, 7],
@@ -179,8 +179,7 @@ describe MoveHelper do
     end
 end
 describe ParseInput do
-    let(:players) { [Player.new("white"), Player.new("black")] }
-    let(:game) { GameBoard.new(players) }
+    let(:game) { GameBoard.new([Player.new(:white), Player.new(:black)]) }
 
     describe "parse" do
         it "returns correct coordinate for a given input" do
@@ -193,12 +192,16 @@ describe ParseInput do
         end
     end
     describe "valid?" do
-        it "returns true if given a valid coordinate" do
+        it "returns true if given a valid coordinate pair" do
             input = game.valid?([1, 2])
             expect(input).to eql(true)
         end
-        it "returns false if given an invalid coordinate" do
-            input = game.valid?([9, 9])
+        it "returns false if given an invalid x coordinate" do
+            input = game.valid?([9, 1])
+            expect(input).to eql(false)
+        end
+        it "returns false if given an invalid y coordinate" do
+            input = game.valid?([1, 9])
             expect(input).to eql(false)
         end
     end
