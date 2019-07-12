@@ -16,6 +16,7 @@ def play_new_game
             puts "Player 2's turn (black):"
             game.make_move(player2)
         end
+        game.display_board
     end
 end
 

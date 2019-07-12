@@ -4,11 +4,15 @@ require_relative 'modules'
 
 class Square
     attr_reader :position
-    attr_accessor :symbol
+    attr_accessor :piece
 
-    def initialize(position)
+    def initialize(position, piece = nil)
         @position = position
-        @symbol = " "
+        @piece = piece
+    end
+
+    def show
+        @piece ? @piece.symbol : " "
     end
 end
 
@@ -20,59 +24,54 @@ class GameBoard
     def initialize(players)
         @all_pieces = players[0].pieces + players[1].pieces
         @board = create_board(create_coordinates)
-        update_board
+        update_children
         @turn = 0
         @over = false
     end
 
     def make_move(player)
-        valid_input = false
         input = gets.chomp.strip.downcase
+
         if input.empty?
             puts "Put something, nerd."
             make_move(player)
         end
-        input = input.split(" ")
-        from = parse(input.first)
-        to = parse(input.last)
 
-        if valid?(from) and valid?(to)
-            piece = @all_pieces.find { |piece| piece.position == from }
-            taken_piece = @all_pieces.find { |piece| piece.position == to }
-            if player.pieces.include?(piece) and piece.children.include?(to)
-                valid_input = true
-                taken_piece.position = :taken if !taken_piece.nil?
-                piece.position = to
+        input = input.split(" ")
+        from_where = parse(input.first)
+        to_where = parse(input.last)
+
+        if valid?(from_where) and valid?(to_where)
+            from = @board.find { |square| square.position == from_where }
+            to = @board.find { |square| square.position == to_where }
+            if player.pieces.include?(from.piece) and from.piece.children.include?(to_where)
+                to.piece.position = :taken if to.piece
+                from.piece.position = to.position
+                to.piece = from.piece
+                from.piece = nil
+                update_children
                 @turn += 1
-                update_board
-                display_board
-            elsif player.pieces.include?(piece) and !piece.children.include?(to)
+            elsif player.pieces.include?(from.piece) and !from.piece.children.include?(to_where)
                 puts "Illegal move"
-            elsif !player.pieces.include?(piece)
+                make_move(player)
+            elsif !player.pieces.include?(from.piece)
                 puts "That's not your piece"
+                make_move(player)
             end
         else
             puts "Invalid command"
-        end
-        if !valid_input
             make_move(player)
         end
     end
 
-    def update_board
-        @board.each do |square|
-            piece = @all_pieces.find { |piece| piece.position == square.position }
-            if piece
-                square.symbol = piece.symbol
-                piece.children = get_children(piece, @all_pieces)
-            else
-                square.symbol = " "
-            end
+    def update_children
+        # Run twice because king's children are dependent on other children
+        2.times do
+            @all_pieces.each { |piece| piece.children = get_children(piece, @all_pieces) }
         end
     end
 
     def display_board
-        taken_pieces = @all_pieces.find_all { |piece| piece.position == :taken }
         horizontal = "   |-----|-----|-----|-----|-----|-----|-----|-----|"
         lines = [
             "      A     B     C     D     E     F     G     H",
@@ -81,14 +80,14 @@ class GameBoard
             " 5 |", " 6 |",
             " 7 |", " 8 |",
         ]
-        @board[0..7].each { |square| lines[1] += "  #{square.symbol}  |" }
-        @board[8..15].each { |square| lines[2] += "  #{square.symbol}  |" }
-        @board[16..23].each { |square| lines[3] += "  #{square.symbol}  |" }
-        @board[24..31].each { |square| lines[4] += "  #{square.symbol}  |" }
-        @board[32..39].each { |square| lines[5] += "  #{square.symbol}  |" }
-        @board[40..47].each { |square| lines[6] += "  #{square.symbol}  |" }
-        @board[48..55].each { |square| lines[7] += "  #{square.symbol}  |" }
-        @board[56..63].each { |square| lines[8] += "  #{square.symbol}  |" }
+        @board[0..7].each { |square| lines[1] += "  #{square.show}  |" }
+        @board[8..15].each { |square| lines[2] += "  #{square.show}  |" }
+        @board[16..23].each { |square| lines[3] += "  #{square.show}  |" }
+        @board[24..31].each { |square| lines[4] += "  #{square.show}  |" }
+        @board[32..39].each { |square| lines[5] += "  #{square.show}  |" }
+        @board[40..47].each { |square| lines[6] += "  #{square.show}  |" }
+        @board[48..55].each { |square| lines[7] += "  #{square.show}  |" }
+        @board[56..63].each { |square| lines[8] += "  #{square.show}  |" }
         puts ""
         lines.reverse.each do |line|
             puts horizontal
@@ -106,7 +105,8 @@ class GameBoard
 
     def create_board(coordinates)
         return coordinates.reduce([]) do |board, coordinate|
-                board << Square.new(coordinate)
+            piece = @all_pieces.find { |piece| piece.position == coordinate }
+            board << Square.new(coordinate, piece)
         end
     end
 end

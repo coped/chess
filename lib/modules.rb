@@ -14,6 +14,7 @@ module MoveHelper
     def get_children(piece, all_pieces)
         children = []
         position = piece.position
+        return [] if position == :taken
         opponent_pieces = all_pieces.find_all { |o| o.color != piece.color }
 
         bishop_queen_rook_children = -> do
@@ -44,11 +45,9 @@ module MoveHelper
                     if result_piece.nil?
                         if opponent_pieces.none? { |o| o.children.include?(result) }
                             children << result
-                        else
-                            puts "opponent can move here!"
                         end
-                    else
-                        children << result if result_piece.color != piece.color
+                    elsif result_piece.color != piece.color
+                        children << result
                     end
                 end
             end
@@ -63,28 +62,26 @@ module MoveHelper
                     if result_piece.nil?
                         children << result
                     end
-                    if piece.color == :white
-                        up_right = [(position.x + 1), (position.y + 1)]
-                        up_left = [(position.x - 1), (position.y + 1)]
-                        opponent_pieces.each do |o|
-                            if o.position == up_right
-                                children << up_right
-                            end
-                            if o.position == up_left
-                                children << up_left
-                            end
-                        end
-                    elsif piece.color == :black
-                        down_right = [(position.x + 1), (position.y - 1)]
-                        down_left = [(position.x - 1), (position.y - 1)]
-                        opponent_pieces.each do |o|
-                            if o.position == down_right
-                                children << down_right
-                            end
-                            if o.position == down_left
-                                children << down_left
-                            end
-                        end
+                end
+            end
+            if piece.color == :white
+                up_right = [(position.x + 1), (position.y + 1)] 
+                up_left = [(position.x - 1), (position.y + 1)]
+                if opponent_pieces.any? { |o| o.position == up_right }
+                    children << up_right
+                end
+                if opponent_pieces.any? { |o| o.position == up_left } 
+                    children << up_left
+                end
+            elsif piece.color == :black
+                down_right = [(position.x + 1), (position.y - 1)]
+                down_left = [(position.x - 1), (position.y - 1)]
+                opponent_pieces.each do |o|
+                    if o.position == down_right
+                        children << down_right
+                    end
+                    if o.position == down_left
+                        children << down_left
                     end
                 end
             end
